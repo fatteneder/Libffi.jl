@@ -201,13 +201,11 @@ end
 # TODO cache results by signature,
 # rm unused fields, including slots
 mutable struct Ffi_cif
-    mem_cif::Vector{UInt8}
-    p::Ptr{Cvoid} # TODO rm
+    mem::Vector{UInt8}
     rettype::Type
     argtypes::Vector{Type}
     ffi_rettype::Ptr{Cvoid}
-    ffi_argtypes::Vector{Ptr{Cvoid}} # TODO could rm as unused elsewhere
-    slots::Vector{Ptr{Cvoid}} # TODO rm
+    ffi_argtypes::Vector{Ptr{Cvoid}}
 
     function Ffi_cif(@nospecialize(rettype::Type{T}), @nospecialize(argtypes::NTuple{N})) where {T, N}
         if !isconcretetype(T) && T !== Any && !(T <: Ref)
@@ -243,8 +241,8 @@ mutable struct Ffi_cif
         if status == 0 # = FFI_OK
             slots = Vector{Ptr{Cvoid}}(undef, 2 * N)
             return new(
-                mem_cif, p_cif, T, [ a for a in argtypes ],
-                ffi_rettype, N == 0 ? Ptr{Cvoid}[] : ffi_argtypes, slots
+                mem_cif, T, [ a for a in argtypes ],
+                ffi_rettype, N == 0 ? Ptr{Cvoid}[] : ffi_argtypes
             )
         else
             msg = "Failed to prepare ffi_cif for f(::$(join(argtypes, ",::")))::$T; ffi_prep_cif returned status "
@@ -260,12 +258,6 @@ mutable struct Ffi_cif
         end
     end
 end
-# TODO rm?
-Ffi_cif(@nospecialize(rettype::Type), @nospecialize(s::Core.SimpleVector)) =
-    Ffi_cif(rettype, tuple(s...))
-
-# TODO rm
-Base.pointer(cif::Ffi_cif) = cif.p
 
 function ffi_call(cif::Ffi_cif, fn::Ptr{Cvoid}, @nospecialize(args::Vector))
     if fn === C_NULL
@@ -320,8 +312,9 @@ function ffi_call(cif::Ffi_cif, fn::Ptr{Cvoid}, @nospecialize(args::Vector))
 
     # TODO Assume that caller preserves args!!!
     GC.@preserve cif args slots mem_args mem_ret begin
+        p = pointer(cif.mem)
         @ccall Libffi_jll.libffi_path.ffi_call(
-            cif.p::Ptr{Cvoid}, fn::Ptr{Cvoid},
+            p::Ptr{Cvoid}, fn::Ptr{Cvoid},
             mem_ret::Ptr{Cvoid}, slots::Ptr{Ptr{Cvoid}}
         )::Cvoid
         return if isbitstype(cif.rettype)
