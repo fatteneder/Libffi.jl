@@ -30,6 +30,9 @@ jobs:
           - ubuntu-latest
           - macOS-latest
           - windows-latest
+        arch:
+          - x64
+          - x86
         allow_failure: [false]
     steps:
       - uses: actions/checkout@v4
