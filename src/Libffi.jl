@@ -147,11 +147,11 @@ const Ctypes = Union{
 to_c_type(t::Ctypes) = t
 to_c_type(t) = Ptr{Cvoid}
 
-# TODO IdDict?
-const FFI_TYPE_CACHE = Dict{Any, Tuple{Vector{UInt8}, Vector{Ptr{Cvoid}}}}()
+const FFI_TYPE_CACHE = Dict{Type, Tuple{Vector{UInt8}, Vector{Ptr{Cvoid}}}}()
 function ffi_type_struct(@nospecialize(t::Type{T})) where {T}
-    if haskey(FFI_TYPE_CACHE, T)
-        return pointer(FFI_TYPE_CACHE[T][1])
+    p = get(FFI_TYPE_CACHE, T, nothing)
+    if !isnothing(p)
+        return p
     end
     n = fieldcount(T)
     elements = Vector{Ptr{Cvoid}}(undef, n + 1) # +1 for null terminator
@@ -199,7 +199,7 @@ function ffi_type_struct(@nospecialize(t::Type{T})) where {T}
 end
 
 # TODO cache results by signature,
-# rm unused fields, including slots
+public Ffi_cif
 mutable struct Ffi_cif
     mem::Vector{UInt8}
     rettype::Type
@@ -259,6 +259,7 @@ mutable struct Ffi_cif
     end
 end
 
+public ffi_call
 function ffi_call(cif::Ffi_cif, fn::Ptr{Cvoid}, @nospecialize(args::Vector))
     if fn === C_NULL
         throw(ArgumentError("Function ptr can't be NULL"))
