@@ -147,11 +147,16 @@ const Ctypes = Union{
 to_c_type(t::Ctypes) = t
 to_c_type(t) = Ptr{Cvoid}
 
-const FFI_TYPE_CACHE = Dict{Type, Tuple{Vector{UInt8}, Vector{Ptr{Cvoid}}}}()
+struct TypeCache
+    mem_ffi_type::Vector{UInt8}
+    elements::Vector{Ptr{Cvoid}}
+end
+
+const FFI_TYPE_CACHE = Dict{Type, TypeCache}()
 function ffi_type_struct(@nospecialize(t::Type{T})) where {T}
-    p = get(FFI_TYPE_CACHE, T, nothing)
-    if !isnothing(p)
-        return p
+    cache = get(FFI_TYPE_CACHE, T, nothing)
+    if !isnothing(cache)
+        return pointer(cache.mem_ffi_type)
     end
     n = fieldcount(T)
     elements = Vector{Ptr{Cvoid}}(undef, n + 1) # +1 for null terminator
@@ -194,7 +199,7 @@ function ffi_type_struct(@nospecialize(t::Type{T})) where {T}
             """
         )
     end
-    FFI_TYPE_CACHE[T] = (mem_ffi_type, elements)
+    FFI_TYPE_CACHE[T] = TypeCache(mem_ffi_type, elements)
     return pointer(mem_ffi_type)
 end
 
@@ -313,7 +318,7 @@ function ffi_call(cif::Ffi_cif, fn::Ptr{Cvoid}, @nospecialize(args::Vector))
 
     # TODO Assume that caller preserves args!!!
     GC.@preserve cif args slots mem_args mem_ret begin
-        p = pointer(cif.mem)
+        p = Ptr{Cvoid}(pointer(cif.mem))
         @ccall Libffi_jll.libffi_path.ffi_call(
             p::Ptr{Cvoid}, fn::Ptr{Cvoid},
             mem_ret::Ptr{Cvoid}, slots::Ptr{Ptr{Cvoid}}
