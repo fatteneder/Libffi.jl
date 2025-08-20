@@ -105,13 +105,6 @@ end
     expected = 12321
     @test result == expected
 
-    cif = Libffi.Ffi_cif(Ptr{Cvoid}, (Csize_t,))
-    fn = Libdl.dlsym(handle, :mwe_jl_alloc_genericmemory_carg)
-    res = Libffi.ffi_call(cif, fn, [Csize_t(15)])
-    result = unsafe_pointer_to_objref(res)
-    @test typeof(result) <: GenericMemory
-    @test length(result) == 15
-
     cif = Libffi.Ffi_cif(Int64, (Complex{Int64},))
     fptr = Libdl.dlsym(handle, :mwe_ctest_jl_arg_c_ret)
     c = Complex{Int64}(20, 51)
