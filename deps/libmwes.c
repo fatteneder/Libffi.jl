@@ -1,5 +1,4 @@
 #include <julia.h>
-#include <ffi.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>

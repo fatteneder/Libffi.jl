@@ -13,6 +13,7 @@ vendored_julia_dir = joinpath(Sys.BINDIR, "..")
 julia_include = joinpath(vendored_julia_dir, "include")
 julia_lib = joinpath(vendored_julia_dir, "lib")
 libffi_include = joinpath(Libffi_jll.artifact_dir, "include")
+libffi_lib = joinpath(Libffi_jll.artifact_dir, "lib")
 
 clang = Clang_jll.clang()
 
@@ -21,6 +22,7 @@ so = joinpath(scratch_dir, "libffihelp.so")
 run(`$(clang)
      $(src)
      -I$(libffi_include)
+     -L$(libffi_lib)
      -std=gnu11 -fPIC -lffi -shared
      -o $(so)
      `)
@@ -40,7 +42,6 @@ so = joinpath(scratch_dir, "libmwes.so")
 run(`$(clang)
      $(src)
      -I$(julia_include) -I$(julia_include)/julia -I$(@__DIR__)
-     -I$(libffi_include)
      -L$(julia_lib) -L$(julia_lib)/julia
      -Wl,--export-dynamic -Wl,-rpath,$(julia_lib) -Wl,-rpath,$(julia_lib)/julia
      -std=gnu11 -fPIC -ljulia -ljulia-internal -shared
