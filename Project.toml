@@ -1,7 +1,7 @@
 name = "Libffi"
 uuid = "5665742d-b723-4fd5-a34a-e5984d1b55a7"
-version = "0.1.0"
 authors = ["Florian Atteneder <florian.atteneder@gmail.com>"]
+version = "0.1.0"
 
 [deps]
 Clang_jll = "0ee61d77-7f21-5576-8119-9fcc46b10100"
@@ -11,6 +11,15 @@ TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
 Clang_jll = "16"
+Libdl = "1.11.0"
 Libffi_jll = "3.4.7"
 Scratch = "1.3.0"
 TOML = "1.0.3"
+Test = "1.11.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[targets]
+test = ["Test", "Libdl"]
