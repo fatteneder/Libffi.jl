@@ -12,6 +12,7 @@ scratch_dir = Scratch.get_scratch!(uuid, "Libffi-$(version)")
 vendored_julia_dir = joinpath(Sys.BINDIR, "..")
 julia_include = joinpath(vendored_julia_dir, "include")
 julia_lib = joinpath(vendored_julia_dir, "lib")
+libffi_include = joinpath(Libffi_jll.artifact_dir, "include")
 
 clang = Clang_jll.clang()
 
@@ -19,7 +20,7 @@ src = joinpath(@__DIR__, "libffihelp.c")
 so = joinpath(scratch_dir, "libffihelp.so")
 run(`$(clang)
      $(src)
-     -I$(Libffi_jll.libffi_path)
+     -I$(libffi_include)
      -std=gnu11 -fPIC -lffi -shared
      -o $(so)
      `)
@@ -39,7 +40,7 @@ so = joinpath(scratch_dir, "libmwes.so")
 run(`$(clang)
      $(src)
      -I$(julia_include) -I$(julia_include)/julia -I$(@__DIR__)
-     -I$(Libffi_jll.libffi_path)
+     -I$(libffi_include)
      -L$(julia_lib) -L$(julia_lib)/julia
      -Wl,--export-dynamic -Wl,-rpath,$(julia_lib) -Wl,-rpath,$(julia_lib)/julia
      -std=gnu11 -fPIC -ljulia -ljulia-internal -shared
