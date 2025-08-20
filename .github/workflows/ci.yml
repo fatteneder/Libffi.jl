@@ -35,6 +35,8 @@ jobs:
           - x86
         allow_failure: [false]
     steps:
+      - if: ${{ matrix.os }} == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y gcc-multilib
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
