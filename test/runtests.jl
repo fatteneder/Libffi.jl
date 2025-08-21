@@ -116,12 +116,13 @@ end
     result = Libffi.ffi_call(cif, fptr, [20, 51])
     @test result == c
 
-    cif = Libffi.Ffi_cif(Any, (Csize_t,))
+    println("trying @ccall version first!")
     fn = Libdl.dlsym(handle, :mwe_jl_alloc_genericmemory_carg)
     result = @ccall $fn(15::Csize_t)::Any
     @test typeof(result) <: GenericMemory
     @test length(result) == 15
     println("@ccall version worked!")
+    cif = Libffi.Ffi_cif(Any, (Csize_t,))
     result = Libffi.ffi_call(cif, fn, [Csize_t(15)])
     @test typeof(result) <: GenericMemory
     @test length(result) == 15
