@@ -17,6 +17,18 @@ permissions:
   contents: read
 
 jobs:
+  # for ubuntu testing we need to install gcc-multilib first, so lets cache that result
+  build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - name: Cache APT packages
+          uses: actions/cache@v4
+          with:
+            path: /var/cache/apt/archives
+            key: ${{ runner.os }}-apt-multilib
+        - name: Install gcc-multilib
+          run: sudo apt-get update && sudo apt-get install -y gcc-multilib
   test:
     name: Test Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
@@ -35,8 +47,8 @@ jobs:
           - x86
         allow_failure: [false]
     steps:
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y gcc-multilib
+      # - if: runner.os == 'Linux'
+      #   run: sudo apt-get update && sudo apt-get install -y gcc-multilib
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
