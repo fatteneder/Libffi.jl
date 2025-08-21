@@ -5,7 +5,7 @@
 
 
 jl_value_t * mwe_jl_alloc_genericmemory_carg(size_t nel) {
-   jl_value_t *memory_type = jl_eval_string("Memory{Int64}");
+   jl_value_t *memory_type = jl_eval_string("Memory{Int32}");
    printf("memory_type = %p\n", memory_type);
    printf("nel = %ld\n", nel);
    fflush(stdout);
