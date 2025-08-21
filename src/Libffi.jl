@@ -203,6 +203,8 @@ function ffi_type_struct(@nospecialize(t::Type{T})) where {T}
     return pointer(mem_ffi_type)
 end
 
+const lock_ffi_prep_cif = Base.ReentrantLock()
+
 # TODO cache results by signature,
 public Ffi_cif
 mutable struct Ffi_cif
@@ -239,10 +241,13 @@ mutable struct Ffi_cif
         mem_cif = Vector{UInt8}(undef, sizeof(UInt8) * sz_cif)
         p_cif = pointer(mem_cif)
         default_abi = ffi_default_abi()
-        status = @ccall Libffi_jll.libffi_path.ffi_prep_cif(
-            p_cif::Ptr{Cvoid}, default_abi::Cint, N::Cint,
-            ffi_rettype::Ptr{Cvoid}, ffi_argtypes::Ptr{Ptr{Cvoid}}
-        )::Cint
+        status = lock(lock_ffi_prep_cif) do
+            # ffi_prep_cif might modify a ffi_type object
+            @ccall Libffi_jll.libffi_path.ffi_prep_cif(
+                p_cif::Ptr{Cvoid}, default_abi::Cint, N::Cint,
+                ffi_rettype::Ptr{Cvoid}, ffi_argtypes::Ptr{Ptr{Cvoid}}
+            )::Cint
+        end
         if status == 0 # = FFI_OK
             slots = Vector{Ptr{Cvoid}}(undef, 2 * N)
             return new(

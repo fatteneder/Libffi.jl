@@ -5,9 +5,12 @@
 
 
 jl_value_t * mwe_jl_alloc_genericmemory_carg(size_t nel) {
-   jl_value_t *memory_type = jl_eval_string("Memory{Int64}");
-   jl_value_t *memory = (jl_value_t *)jl_alloc_genericmemory(memory_type, nel);
+   jl_value_t *memory_type = jl_eval_string("Memory{Int32}");
+   if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred()));
    printf("memory_type = %p\n", memory_type);
+   printf("nel = %zu\n", nel);
+   fflush(stdout);
+   jl_value_t *memory = (jl_value_t *)jl_alloc_genericmemory(memory_type, nel);
    printf("memory = %p\n", memory);
    printf("jl_typeof_str(memory_type) = %s\n", jl_typeof_str(memory_type));
    printf("jl_typeof_str(memory) = %s\n", jl_typeof_str(memory));
@@ -67,13 +70,13 @@ jl_value_t * get_tuple_pointer() {
 }
 
 int64_t mwe_foreign_carg_cret(int64_t n) {
-   printf("n = %d\n", n);
+   printf("n = %lld\n", n);
    return 1;
 }
 
 int64_t mwe_foreign_cptr_cret(int64_t *n) {
    printf("n = %p\n", n);
-   printf("n[1] = %d\n", n[1]);
+   printf("n[1] = %lld\n", n[1]);
    return 1;
 }
 
@@ -85,7 +88,7 @@ int64_t mwe_foreign_jlarg_cret(jl_value_t *n) {
 }
 
 jl_value_t * mwe_foreign_carg_jlret(int64_t n) {
-   printf("n = %d\n", n);
+   printf("n = %lld\n", n);
    jl_value_t *v = jl_eval_string("1");
    return v;
 }
@@ -121,8 +124,8 @@ typedef struct {
 } complex_t;
 
 int64_t mwe_ctest_jl_arg_c_ret(complex_t a) {
-   printf("a.real = %d\n", a.real);
-   printf("a.imag = %d\n", a.imag);
+   printf("a.real = %lld\n", a.real);
+   printf("a.imag = %lld\n", a.imag);
    return a.real + a.imag;
 }
 
