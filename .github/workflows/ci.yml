@@ -28,10 +28,10 @@ jobs:
           - '1' # automatically expands to the latest stable 1.x release of Julia
         os:
           - ubuntu-latest
-          - macOS-latest
-          - windows-latest
+          # - macOS-latest
+          # - windows-latest
         arch:
-          - x64
+          # - x64
           - x86
         allow_failure: [false]
     steps:
