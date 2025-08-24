@@ -45,6 +45,7 @@ run(`$(clang)
      -L$(julia_lib) -L$(julia_lib)/julia
      -Wl,--export-dynamic -Wl,-rpath,$(julia_lib) -Wl,-rpath,$(julia_lib)/julia
      -std=gnu11 -fPIC -ljulia -ljulia-internal -shared
+     -O3
      -o $(so)`)
 
 println("done")
