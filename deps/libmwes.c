@@ -5,11 +5,25 @@
 
 jl_value_t * mwe_jl_alloc_genericmemory_carg(size_t nel) {
    jl_value_t *res = jl_eval_string("1+2");
-   if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred()));
-   printf("res = %ld\n", jl_unbox_int64(res));
-   fflush(stdout);
+   if (jl_exception_occurred()) {
+     // none of these allocate, so a gc-root (JL_GC_PUSH) is not necessary
+      jl_call2(jl_get_function(jl_base_module, "showerror"),
+               jl_stderr_obj(),
+               jl_exception_occurred());
+      jl_printf(jl_stderr_stream(), "\n");
+   }
+   /** if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred())); */
+   /** printf("res = %ld\n", jl_unbox_int64(res)); */
+   /** fflush(stdout); */
    jl_value_t *memory_type = jl_eval_string("Memory{Int32}");
-   if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred()));
+   if (jl_exception_occurred()) {
+     // none of these allocate, so a gc-root (JL_GC_PUSH) is not necessary
+      jl_call2(jl_get_function(jl_base_module, "showerror"),
+               jl_stderr_obj(),
+               jl_exception_occurred());
+      jl_printf(jl_stderr_stream(), "\n");
+   }
+   /** if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred())); */
    printf("memory_type = %p\n", memory_type);
    printf("nel = %zu\n", nel);
    fflush(stdout);
@@ -73,13 +87,13 @@ jl_value_t * get_tuple_pointer() {
 }
 
 int64_t mwe_foreign_carg_cret(int64_t n) {
-   printf("n = %lld\n", n);
+   printf("n = %ld\n", n);
    return 1;
 }
 
 int64_t mwe_foreign_cptr_cret(int64_t *n) {
    printf("n = %p\n", n);
-   printf("n[1] = %lld\n", n[1]);
+   printf("n[1] = %ld\n", n[1]);
    return 1;
 }
 
@@ -91,7 +105,7 @@ int64_t mwe_foreign_jlarg_cret(jl_value_t *n) {
 }
 
 jl_value_t * mwe_foreign_carg_jlret(int64_t n) {
-   printf("n = %lld\n", n);
+   printf("n = %ld\n", n);
    jl_value_t *v = jl_eval_string("1");
    return v;
 }
@@ -127,8 +141,8 @@ typedef struct {
 } complex_t;
 
 int64_t mwe_ctest_jl_arg_c_ret(complex_t a) {
-   printf("a.real = %lld\n", a.real);
-   printf("a.imag = %lld\n", a.imag);
+   printf("a.real = %ld\n", a.real);
+   printf("a.imag = %ld\n", a.imag);
    return a.real + a.imag;
 }
 
