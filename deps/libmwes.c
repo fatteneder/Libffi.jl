@@ -4,6 +4,11 @@
 #include <stdlib.h>
 
 jl_value_t * mwe_jl_alloc_genericmemory_carg(size_t nel) {
+#ifdef _P64
+   printf("_P64 defined\n");
+#else
+   printf("_P64 not defined\n");
+#endif
    jl_value_t *res = jl_eval_string("1+2");
    if (jl_exception_occurred()) {
      // none of these allocate, so a gc-root (JL_GC_PUSH) is not necessary
