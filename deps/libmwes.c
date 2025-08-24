@@ -3,8 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 jl_value_t * mwe_jl_alloc_genericmemory_carg(size_t nel) {
+   jl_value_t *res = jl_eval_string("1+2");
+   if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred()));
+   printf("res = %ld\n", jl_unbox_int64(res));
+   fflush(stdout);
    jl_value_t *memory_type = jl_eval_string("Memory{Int32}");
    if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred()));
    printf("memory_type = %p\n", memory_type);
