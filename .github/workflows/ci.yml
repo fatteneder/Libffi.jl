@@ -17,30 +17,6 @@ permissions:
   contents: read
 
 jobs:
-  # for ubuntu testing we need to install gcc-multilib first, so lets cache that result
-  build:
-      runs-on: ubuntu-latest
-      steps:
-        # Create a custom directory for our apt cache
-        - name: Create custom apt cache directory
-          run: mkdir -p /home/runner/apt-cache
-
-        # Cache the custom directory
-        - name: Cache custom APT packages
-          id: cache-apt
-          uses: actions/cache@v4
-          with:
-            path: /home/runner/apt-cache
-            key: ${{ runner.os }}-apt-multilib-v1
-
-        # Install gcc-multilib into the custom directory
-        - name: Install gcc-multilib into custom directory
-          run: |
-            sudo apt-get update
-            sudo chown -R _apt:_apt /home/runner/apt-cache
-            sudo apt-get -o dir::cache=/home/runner/apt-cache -y install gcc-multilib
-
-
   test:
     name: Test Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ubuntu-latest
@@ -61,12 +37,9 @@ jobs:
         allow_failure: [false]
     steps:
       - uses: actions/checkout@v4
-      - name: Restore APT cache
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-multilib
       - name: Install dependencies for test
+        # for ubuntu testing we need to install gcc-multilib first
+        if: ${{ matrix.os }} == "ubuntu-latest"
         run: sudo apt-get update && sudo apt-get install -y gcc-multilib
       - uses: julia-actions/setup-julia@v2
         with:
