@@ -21,21 +21,25 @@ jobs:
   build:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v4
-        - name: Cache APT packages
+        # Create a custom directory for our apt cache
+        - name: Create custom apt cache directory
+          run: mkdir -p /home/runner/apt-cache
+
+        # Cache the custom directory
+        - name: Cache custom APT packages
           id: cache-apt
           uses: actions/cache@v4
           with:
-            path: /var/cache/apt/archives
-            key: ${{ runner.os }}-apt-multilib
-        - name: Fix permissions and clean up apt cache
+            path: /home/runner/apt-cache
+            key: ${{ runner.os }}-apt-multilib-v1
+
+        # Install gcc-multilib into the custom directory
+        - name: Install gcc-multilib into custom directory
           run: |
-            # Clean up lock files and ensure permissions are correct
-            sudo rm -f /var/cache/apt/archives/lock
-            sudo rm -f /var/cache/apt/archives/partial/*
-            sudo chmod -R 777 /var/cache/apt/archives
-        - name: Install gcc-multilib
-          run: sudo apt-get update && sudo apt-get install -y gcc-multilib
+            sudo apt-get update
+            sudo apt-get -o dir::cache=/home/runner/apt-cache -y install gcc-multilib
+
+
   test:
     name: Test Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ubuntu-latest
