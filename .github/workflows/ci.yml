@@ -37,6 +37,7 @@ jobs:
         - name: Install gcc-multilib into custom directory
           run: |
             sudo apt-get update
+            sudo chown -R _apt:_apt /home/runner/apt-cache
             sudo apt-get -o dir::cache=/home/runner/apt-cache -y install gcc-multilib
 
 
