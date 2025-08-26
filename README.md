@@ -1,6 +1,6 @@
 # Libffi.jl
 
-This repository provides Julia bindings for (libffi)[https://github.com/libffi/libffi].
+This repository provides Julia bindings for [libffi](https://github.com/libffi/libffi).
 
 # Installation
 
@@ -11,7 +11,7 @@ julia> Pkg.add("https://github.com/fatteneder/Libffi.jl")
 
 # Usage
 
-This repository provides an LLVM independent `@ccall` mechanism based on libffi.
+This package provides an LLVM independent `@ccall` mechanism based on libffi.
 You can use it as:
 
 ```julia
@@ -29,7 +29,7 @@ julia> Libffi.ffi_call(cif, p_clock, [])
 
 # References
 
-- (Julia lang docs on `ccall`)[https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/]
+- [Julia lang docs on `ccall`](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/)
 
 # TODO
 
