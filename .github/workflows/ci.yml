@@ -28,6 +28,12 @@ jobs:
           with:
             path: /var/cache/apt/archives
             key: ${{ runner.os }}-apt-multilib
+        - name: Fix permissions and clean up apt cache
+          run: |
+            # Clean up lock files and ensure permissions are correct
+            sudo rm -f /var/cache/apt/archives/lock
+            sudo rm -f /var/cache/apt/archives/partial/*
+            sudo chmod -R 777 /var/cache/apt/archives
         - name: Install gcc-multilib
           run: sudo apt-get update && sudo apt-get install -y gcc-multilib
   test:
