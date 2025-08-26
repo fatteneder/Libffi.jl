@@ -4,34 +4,8 @@
 #include <stdlib.h>
 
 jl_value_t * mwe_jl_alloc_genericmemory_carg(size_t nel) {
-#ifdef _P64
-   printf("_P64 defined\n");
-#else
-   printf("_P64 not defined\n");
-#endif
-   jl_value_t *res = jl_eval_string("1+2");
-   if (jl_exception_occurred()) {
-     // none of these allocate, so a gc-root (JL_GC_PUSH) is not necessary
-      jl_call2(jl_get_function(jl_base_module, "showerror"),
-               jl_stderr_obj(),
-               jl_exception_occurred());
-      jl_printf(jl_stderr_stream(), "\n");
-   }
-   /** if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred())); */
-   /** printf("res = %ld\n", jl_unbox_int64(res)); */
-   /** fflush(stdout); */
    jl_value_t *memory_type = jl_eval_string("Memory{Int32}");
-   if (jl_exception_occurred()) {
-     // none of these allocate, so a gc-root (JL_GC_PUSH) is not necessary
-      jl_call2(jl_get_function(jl_base_module, "showerror"),
-               jl_stderr_obj(),
-               jl_exception_occurred());
-      jl_printf(jl_stderr_stream(), "\n");
-   }
-   /** if (jl_exception_occurred()) printf("%s \n", jl_typeof_str(jl_exception_occurred())); */
    printf("memory_type = %p\n", memory_type);
-   printf("nel = %zu\n", nel);
-   fflush(stdout);
    jl_value_t *memory = (jl_value_t *)jl_alloc_genericmemory(memory_type, nel);
    printf("memory = %p\n", memory);
    printf("jl_typeof_str(memory_type) = %s\n", jl_typeof_str(memory_type));
