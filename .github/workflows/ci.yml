@@ -32,7 +32,7 @@ jobs:
           - windows-latest
         arch:
           - x64
-          # - x86
+          - x86
         allow_failure: [false]
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +47,8 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@v1
+        env:
+          JULIA_USE_FLISP_PARSER: 1
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v4
         with:
