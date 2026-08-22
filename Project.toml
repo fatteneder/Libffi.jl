@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 Clang_jll = "0ee61d77-7f21-5576-8119-9fcc46b10100"
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 Libffi_jll = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
 Scratch = "6c6a2e73-6563-6170-7368-637461726353"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"

@@ -1,6 +1,7 @@
 module Libffi
 
 
+import Libdl
 import Libffi_jll
 import Scratch
 import TOML
@@ -14,9 +15,16 @@ function __init__()
     uuid = Base.UUID(project_toml["uuid"])
     version = VersionNumber(project_toml["version"])
     SCRATCH_DIR[] = Scratch.get_scratch!(uuid, "Libffi-$(version)")
-    LIBFFIHELP_PATH[] = normpath(joinpath(SCRATCH_DIR[], "libffihelp.so"))
+    push!(Base.DL_LOAD_PATH, SCRATCH_DIR[])
     return
 end
+
+
+@nospecialize
+TODO() = error("Not implemented yet")
+TODO(msg) = TODO("Not implemented yet: ", msg)
+TODO(prefix, msg) = error(prefix, msg)
+@specialize
 
 
 # @nospecialize is needed here to return the desired pointer also for immutables.
@@ -205,7 +213,18 @@ end
 
 const lock_ffi_prep_cif = Base.ReentrantLock()
 
-# TODO cache results by signature,
+struct Ffi_cif_key
+    rettype::Symbol
+    argtypes::Vector{Symbol}
+    # TODO gc_safe, nreq?
+    function Ffi_cif_key(rt::Symbol, ats::Vector{Symbol})
+        return new(rt, ats)
+    end
+end
+function Ffi_cif_key(@nospecialize(rettype), @nospecialize(argtypes::Tuple))
+    return Ffi_cif_key(Symbol(rettype), Symbol[ Symbol(at) for at in argtypes ])
+end
+
 public Ffi_cif
 mutable struct Ffi_cif
     mem::Vector{UInt8}
@@ -266,6 +285,14 @@ mutable struct Ffi_cif
                 error(msg * "unknown error code $status")
             end
         end
+    end
+end
+
+const FFI_CIF_CACHE = Dict{Ffi_cif_key, Ffi_cif}()
+function Ffi_cif(@nospecialize(rettype), @nospecialize(argtypes), ::Bool)
+    key = Ffi_cif_key(rettype, argtypes)
+    return get(FFI_TYPE_CACHE, key) do
+        Ffi_cif(rettype, argtypes)
     end
 end
 
@@ -336,6 +363,34 @@ function ffi_call(cif::Ffi_cif, fn::Ptr{Cvoid}, @nospecialize(args::Vector))
             unsafe_load(Ptr{cif.rettype}(pointer(mem_ret)))
         end
     end
+end
+
+
+macro ccall(expr...)
+    func, rettype, types, args, gc_safe, nreq = Base.ccall_macro_parse(expr)
+    fname = ""
+    libname = Symbol()
+    ptr = C_NULL
+    if Base.isexpr(func, :tuple)
+        fname = func.args[1].value
+        if length(func.args) > 1
+            libname = func.args[2]
+        end
+    else
+        TODO()
+    end
+    sym_lib = gensym(libname)
+    sym_fptr = gensym(Symbol(libname, :_, fname))
+    sym_cif = gensym(:cif)
+    ex_types = Expr(:tuple, types...)
+    ex_array = Expr(:array, types...)
+    ex = quote
+        $sym_lib = Libdl.dlopen($(esc(libname)))
+        $sym_fptr = Libdl.dlsym($sym_lib, $(QuoteNode(fname)))
+        $sym_cif = Libffi.Ffi_cif($rettype, $ex_types, $(esc(true)))
+        Libffi.ffi_call($sym_cif, $sym_fptr, [$(esc.(args)...)])
+    end
+    return ex
 end
 
 
